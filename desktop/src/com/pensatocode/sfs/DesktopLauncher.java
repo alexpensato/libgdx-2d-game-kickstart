@@ -3,6 +3,7 @@ package com.pensatocode.sfs;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.pensatocode.sfs.SfsGame;
+import com.pensatocode.sfs.resources.GlobalVariables;
 
 // Please note that on macOS your application needs to be started with the -XstartOnFirstThread JVM argument
 public class DesktopLauncher {
@@ -10,6 +11,10 @@ public class DesktopLauncher {
 		Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
 		config.setForegroundFPS(60);
 		config.setTitle("Stick Figure Showdown");
+
+		// set the window size manually, instead of using the LibGDX default
+		config.setWindowedMode(GlobalVariables.WINDOW_WIDTH, GlobalVariables.WINDOW_HEIGHT);
+
 		new Lwjgl3Application(new SfsGame(), config);
 	}
 }

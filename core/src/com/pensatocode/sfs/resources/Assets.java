@@ -6,7 +6,11 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 
 public class Assets {
     // asset manager
-    public final AssetManager manager = new AssetManager();
+    private final AssetManager manager;
+
+    public Assets() {
+        this.manager = new AssetManager();
+    }
 
     // gameplay assets
     public static final String BACKGROUND_TEXTURE = "textures/Background.png";
@@ -20,7 +24,7 @@ public class Assets {
     public static final String WIN_SPRITE_SHEET = "sprites/WinSpriteSheet.png";
     public static final String LOSE_SPRITE_SHEET = "sprites/LoseSpriteSheet.png";
     public static final String GAMEPLAY_BUTTONS_ATLAS = "textures/GameplayButtons.atlas";
-    public static final String BLOOD_ATLAS = "textures/Blood.png";
+    public static final String BLOOD_ATLAS = "textures/Blood.atlas";
 
     // fonts
     public static final String ROBOTO_REGULAR = "fonts/Roboto-Regular.ttf";
@@ -54,9 +58,16 @@ public class Assets {
         manager.dispose();
     }
 
+    public AssetManager manager() {
+        return manager;
+    }
+
     private void loadGameplayAssets() {
+        // Scene
         manager.load(BACKGROUND_TEXTURE, Texture.class);
         manager.load(FRONT_ROPES_TEXTURE, Texture.class);
+
+        // Sprite Sheets
         manager.load(IDLE_SPRITE_SHEET, Texture.class);
         manager.load(WALK_SPRITE_SHEET, Texture.class);
         manager.load(PUNCH_SPRITE_SHEET, Texture.class);
@@ -65,6 +76,8 @@ public class Assets {
         manager.load(BLOCK_SPRITE_SHEET, Texture.class);
         manager.load(WIN_SPRITE_SHEET, Texture.class);
         manager.load(LOSE_SPRITE_SHEET, Texture.class);
+
+        // Texture Atlases
         manager.load(GAMEPLAY_BUTTONS_ATLAS, TextureAtlas.class);
         manager.load(BLOOD_ATLAS, TextureAtlas.class);
     }
