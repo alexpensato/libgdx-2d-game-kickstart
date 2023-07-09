@@ -224,6 +224,15 @@ public class GameScreen implements Screen, InputProcessor {
             game.player().moveDown();
         }
 
+        // check if the player has pressed a block or attack key
+        if (keycode == Input.Keys.I) {
+            game.player().block();
+        } else if (keycode == Input.Keys.Y) {
+            game.player().punch();
+        } else if (keycode == Input.Keys.U) {
+            game.player().kick();
+        }
+
         return true;
     }
 
@@ -241,6 +250,11 @@ public class GameScreen implements Screen, InputProcessor {
             game.player().stopMovingUp();
         } else if (keycode == Input.Keys.DOWN || keycode == Input.Keys.S) {
             game.player().stopMovingDown();
+        }
+
+        // if player has released the block key, stop blocking
+        if (keycode == Input.Keys.I) {
+            game.player().stopBlocking();
         }
 
         return true;
