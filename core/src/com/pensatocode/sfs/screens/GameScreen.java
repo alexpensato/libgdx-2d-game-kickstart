@@ -11,6 +11,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.pensatocode.sfs.SfsGame;
+import com.pensatocode.sfs.objects.Fighter;
 import com.pensatocode.sfs.resources.Assets;
 import com.pensatocode.sfs.resources.GlobalVariables;
 
@@ -54,6 +55,8 @@ public class GameScreen implements Screen, InputProcessor {
     private static final float PLAYER_START_POSITION_X = 16f;
     private static final float OPPONENT_START_POSITION_X = 51f;
     private static final float FIGHTER_START_POSITION_Y = 15f;
+    private static final float FIGHTER_CONTACT_DISTANCE_X = 7.5f;
+    private static final float FIGHTER_CONTACT_DISTANCE_Y = 1.5f;
 
     public GameScreen(SfsGame newGame) {
         game = newGame;
@@ -90,6 +93,8 @@ public class GameScreen implements Screen, InputProcessor {
     public void show() {
         // process user input
         Gdx.input.setInputProcessor(this);
+
+        game.opponent().block();
     }
 
     @Override
@@ -167,6 +172,24 @@ public class GameScreen implements Screen, InputProcessor {
         // keep the fighter within the bound of the ring
         keepFighterInRing(game.player().getPosition());
         keepFighterInRing(game.opponent().getPosition());
+
+        // check if the fighters are within contact distance
+        if (areWithinContactDistance(game.player().getPosition(), game.opponent().getPosition())) {
+            if (game.player().isAttackActive()) {
+                // if the fighters are within contact distance and the player is attacking,
+                // the opponent gets hit
+                game.opponent().getHit(Fighter.HIT_STRENGTH);
+
+                // flag that contact has been made to deactivate the player's attack
+                game.player().makeContact();
+
+                // check if the opponent is knocked out
+                if (game.opponent().hasLost()) {
+                    // if opponent has lost, player wins
+                    game.player().win();
+                }
+            }
+        }
     }
 
     private void keepFighterInRing(Vector2 position) {
@@ -181,6 +204,13 @@ public class GameScreen implements Screen, InputProcessor {
         } else if (position.x > position.y / -RING_SLOPE + RING_MAX_X) {
             position.x = position.y / -RING_SLOPE + RING_MAX_X;
         }
+    }
+
+    private boolean areWithinContactDistance(Vector2 position1, Vector2 position2) {
+        // determine if the fighters are within contact distance
+        float xDistance = Math.abs(position1.x - position2.x);
+        float yDistance = Math.abs(position1.y - position2.y);
+        return xDistance <= FIGHTER_CONTACT_DISTANCE_X && yDistance <= FIGHTER_CONTACT_DISTANCE_Y;
     }
 
     @Override
