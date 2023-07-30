@@ -7,7 +7,9 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.pensatocode.sfs.SfsGame;
@@ -39,6 +41,25 @@ public class GameScreen implements Screen, InputProcessor {
      *  stretching it if necessary.
      */
     private final ExtendViewport viewport;
+
+    // game
+    private GlobalVariables.Difficulty difficulty = GlobalVariables.Difficulty.EASY;
+
+    // rounds
+    private int roundsWon = 0;
+    private int roundsLost = 0;
+    private static final float MAX_ROUND_TIME = 99.99f;
+    private float roundTime = MAX_ROUND_TIME;
+
+    // fonts
+    private BitmapFont smallFont;
+    private BitmapFont mediumFont;
+    private BitmapFont largeFont;
+    private static final Color DEFAULT_FONT_COLOR = Color.WHITE;
+
+    // HUD
+    private static final Color HEALTH_BAR_COLOR = Color.RED;
+    private static final Color HEALTH_BAR_BACKGROUND_COLOR = GlobalVariables.GOLD;
 
     // background/ring
     private Texture backgroundTexture;
@@ -79,6 +100,9 @@ public class GameScreen implements Screen, InputProcessor {
         // create the game area
         createGameArea();
 
+        // set up the fonts
+        setUpFonts();
+
         // initialize the fighters
         game.player().getReady(PLAYER_START_POSITION_X, FIGHTER_START_POSITION_Y);
         game.opponent().getReady(OPPONENT_START_POSITION_X, FIGHTER_START_POSITION_Y);
@@ -89,12 +113,29 @@ public class GameScreen implements Screen, InputProcessor {
         this.frontRopesTexture = game.assets().manager().get(Assets.FRONT_ROPES_TEXTURE);
     }
 
+    private void setUpFonts() {
+        smallFont = game.assets().manager().get(Assets.SMALL_FONT);
+        smallFont.getData().setScale(GlobalVariables.WORLD_SCALE);
+        smallFont.setColor(DEFAULT_FONT_COLOR);
+        smallFont.setUseIntegerPositions(false);
+
+        mediumFont = game.assets().manager().get(Assets.MEDIUM_FONT);
+        mediumFont.getData().setScale(GlobalVariables.WORLD_SCALE);
+        mediumFont.setColor(DEFAULT_FONT_COLOR);
+        mediumFont.setUseIntegerPositions(false);
+
+        largeFont = game.assets().manager().get(Assets.LARGE_FONT);
+        largeFont.getData().setScale(GlobalVariables.WORLD_SCALE);
+        largeFont.setColor(DEFAULT_FONT_COLOR);
+        largeFont.setUseIntegerPositions(false);
+    }
+
     @Override
     public void show() {
         // process user input
         Gdx.input.setInputProcessor(this);
 
-        game.opponent().block();
+        //game.opponent().block();
     }
 
     @Override
@@ -136,6 +177,9 @@ public class GameScreen implements Screen, InputProcessor {
                 frontRopesTexture.getHeight() * GlobalVariables.WORLD_SCALE
         );
 
+        // draw the HUD
+        renderHUD();
+
         // end drawing
         game.batch().end();
     }
@@ -153,6 +197,33 @@ public class GameScreen implements Screen, InputProcessor {
             // draw the player
             game.player().render(game.batch());
         }
+    }
+
+    private void renderHUD() {
+        float HUDMargin = 1f;
+
+        // draw the rounds won to lost ratio
+        smallFont.draw(game.batch(), "WINS: " + roundsWon + " - " + roundsLost,
+                HUDMargin,
+                GlobalVariables.WORLD_HEIGHT - HUDMargin);
+
+        // draw the difficulty setting
+        String text = "DIFFICULTY: ";
+        switch (difficulty) {
+            case EASY:
+                text += "EASY";
+                break;
+            case MEDIUM:
+                text += "MEDIUM";
+                break;
+            case HARD: default:
+                text += "HARD";
+                break;
+        }
+        smallFont.draw(game.batch(), text,
+                viewport.getWorldWidth() - HUDMargin,
+                viewport.getWorldHeight() - HUDMargin,
+                0, Align.right, false);
     }
 
     private void update(float deltaTime) {
@@ -179,6 +250,7 @@ public class GameScreen implements Screen, InputProcessor {
                 // if the fighters are within contact distance and the player is attacking,
                 // the opponent gets hit
                 game.opponent().getHit(Fighter.HIT_STRENGTH);
+                System.out.println("Opponent hit: " + game.opponent().getLife());
 
                 // flag that contact has been made to deactivate the player's attack
                 game.player().makeContact();

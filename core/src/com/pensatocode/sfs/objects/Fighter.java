@@ -207,6 +207,10 @@ public class Fighter {
         return madeContact;
     }
 
+    public boolean isAttacking() {
+        return state == State.PUNCH || state == State.KICK;
+    }
+
     public boolean isAttackActive() {
         // the attack is only active if the fighter has not made contact yet
         // and the attack animation has not just started or is almost finished
@@ -249,10 +253,6 @@ public class Fighter {
 
     public void win() {
         changeState(State.WIN);
-    }
-
-    public boolean isAttacking() {
-        return state == State.PUNCH || state == State.KICK;
     }
 
     public void render(SpriteBatch batch) {
