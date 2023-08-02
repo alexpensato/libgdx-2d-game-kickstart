@@ -3,6 +3,7 @@ package com.pensatocode.sfs;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.pensatocode.sfs.objects.Fighter;
 import com.pensatocode.sfs.resources.Assets;
 import com.pensatocode.sfs.screens.GameScreen;
@@ -11,6 +12,7 @@ public class SfsGame extends Game {
     // It's good practice to use a single SpriteBatch per game.
     // It's also good practice to dispose of it when it's no longer needed.
     private SpriteBatch batch;
+    private ShapeRenderer shapeRenderer;
 	private Assets assets;
     private GameScreen gameScreen;
     private Fighter player;
@@ -19,6 +21,7 @@ public class SfsGame extends Game {
     @Override
     public void create() {
         batch = new SpriteBatch();
+        shapeRenderer = new ShapeRenderer();
 		assets = new Assets();
 
 		// load all assets
@@ -43,11 +46,16 @@ public class SfsGame extends Game {
     public void dispose() {
         gameScreen.dispose();
         batch.dispose();
+        shapeRenderer.dispose();
 		assets.dispose();
     }
 
     public SpriteBatch batch() {
         return batch;
+    }
+
+    public ShapeRenderer shapeRenderer() {
+        return shapeRenderer;
     }
 
     public Assets assets() {

@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -49,7 +50,7 @@ public class GameScreen implements Screen, InputProcessor {
     private int roundsWon = 0;
     private int roundsLost = 0;
     private static final float MAX_ROUND_TIME = 99.99f;
-    private float roundTime = MAX_ROUND_TIME;
+    private float roundTimer = MAX_ROUND_TIME;
 
     // fonts
     private BitmapFont smallFont;
@@ -135,6 +136,7 @@ public class GameScreen implements Screen, InputProcessor {
         // process user input
         Gdx.input.setInputProcessor(this);
 
+
         //game.opponent().block();
     }
 
@@ -148,8 +150,9 @@ public class GameScreen implements Screen, InputProcessor {
         // update the game
         update(delta);
 
-        // set the sprite batch to use the camera's coordinate system
+        // set the sprite batch amd the shape renderer to use the viewport's camera
         game.batch().setProjectionMatrix(viewport.getCamera().combined);
+        game.shapeRenderer().setProjectionMatrix(viewport.getCamera().combined);
 
         // begin drawing
         game.batch().begin();
@@ -224,6 +227,71 @@ public class GameScreen implements Screen, InputProcessor {
                 viewport.getWorldWidth() - HUDMargin,
                 viewport.getWorldHeight() - HUDMargin,
                 0, Align.right, false);
+
+        // set up the layout sizes and positioning
+        float healthBarPadding = 0.5f;
+        float healthBarHeight = smallFont.getCapHeight() + healthBarPadding * 2f;
+        float healthBarMaxWidth = 32f;
+        float healthBarBackgroundPadding = 0.2f;
+        float healthBarBackgroundHeight = healthBarHeight + healthBarBackgroundPadding * 2f;
+        float healthBarBackgroundWidth = healthBarMaxWidth + healthBarBackgroundPadding * 2f;
+        float healthBarBackgroundMarginTop = 0.8f;
+        float healthBarBackgroundPositionY = viewport.getWorldHeight()  - HUDMargin - smallFont.getCapHeight()
+                - healthBarBackgroundMarginTop - healthBarBackgroundHeight;
+        float healthBarPositionY = healthBarBackgroundPositionY + healthBarBackgroundPadding;
+        float fighterNamePositionY = healthBarPositionY + healthBarHeight - healthBarPadding;
+
+        game.batch().end();
+        game.shapeRenderer().begin(ShapeRenderer.ShapeType.Filled);
+
+        // draw the player's health bar background
+        game.shapeRenderer().setColor(HEALTH_BAR_BACKGROUND_COLOR);
+        game.shapeRenderer().rect(
+                HUDMargin,
+                healthBarBackgroundPositionY,
+                healthBarBackgroundWidth,
+                healthBarBackgroundHeight
+        );
+        game.shapeRenderer().rect(
+                viewport.getWorldWidth() - HUDMargin - healthBarBackgroundWidth,
+                healthBarBackgroundPositionY,
+                healthBarBackgroundWidth,
+                healthBarBackgroundHeight
+        );
+
+        // draw the player's health bar
+        game.shapeRenderer().setColor(HEALTH_BAR_COLOR);
+        float healthBarWidth = healthBarMaxWidth * game.player().getLife() / Fighter.MAX_LIFE;
+        game.shapeRenderer().rect(
+                HUDMargin + healthBarBackgroundPadding,
+                healthBarPositionY,
+                healthBarWidth,
+                healthBarHeight
+        );
+        healthBarWidth = healthBarMaxWidth * game.opponent().getLife() / Fighter.MAX_LIFE;
+        game.shapeRenderer().rect(
+                viewport.getWorldWidth() - HUDMargin - healthBarBackgroundPadding - healthBarWidth,
+                healthBarPositionY,
+                healthBarWidth,
+                healthBarHeight
+        );
+
+        game.shapeRenderer().end();
+        game.batch().begin();
+
+        // draw the player's name
+        smallFont.draw(game.batch(), game.player().getName(),
+                HUDMargin + healthBarBackgroundPadding + healthBarPadding,
+                fighterNamePositionY);
+        smallFont.draw(game.batch(), game.opponent().getName(),
+                viewport.getWorldWidth() - HUDMargin - healthBarBackgroundPadding - healthBarPadding,
+                fighterNamePositionY, 0, Align.right, false);
+
+        // draw the round timer
+        mediumFont.draw(game.batch(), String.format("%02d", (int) roundTimer),
+                viewport.getWorldWidth() / 2f,
+                viewport.getWorldHeight() - HUDMargin,
+                0, Align.center, false);
     }
 
     private void update(float deltaTime) {
