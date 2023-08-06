@@ -72,6 +72,19 @@ public class Assets {
         return manager;
     }
 
+    /**
+     *  Loads all the assets needed for the gameplay screen.
+     *
+     *  LibGDX Texture Filters:
+     *  Defines the algorithm to use when the texture is scaled up or down.
+     *  MinFilter: Defines the algorithm to use when the texture is scaled down.
+     *  MagFilter: Defines the algorithm to use when the texture is scaled up.
+     *
+     *  Texture filter options:
+     *  Nearest: Uses the pixel closest to the sampling point.
+     *  Linear: Uses the weighted average of the four pixels closest to the sampling point.
+     *  MipMap: Uses mipmaps to select the correct level-of-detail of the texture.
+     */
     private void loadGameplayAssets() {
         // Scene
         manager.load(BACKGROUND_TEXTURE, Texture.class);

@@ -297,7 +297,7 @@ public class Fighter {
                 currentFrame = walkAnimation.getKeyFrame(renderStateTime, true);
                 break;
             case WIN:
-                currentFrame = winAnimation.getKeyFrame(renderStateTime, false);
+                currentFrame = winAnimation.getKeyFrame(renderStateTime, true);
                 break;
             default:
                 currentFrame = idleAnimation.getKeyFrame(renderStateTime, true);
