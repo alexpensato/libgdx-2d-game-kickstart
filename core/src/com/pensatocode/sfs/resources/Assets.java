@@ -107,6 +107,12 @@ public class Assets {
         manager.load(LOSE_SPRITE_SHEET, Texture.class, param);
 
         // Texture Atlases
+        // Atlases already contain information about the texture filters
+        // so we don't need to set them again.
+        // For packing textures into atlases,
+        // see: https://github.com/crashinvaders/gdx-texture-packer-gui
+        // or: https://www.leshylabs.com/apps/sstool/
+
         manager.load(GAMEPLAY_BUTTONS_ATLAS, TextureAtlas.class);
         manager.load(BLOOD_ATLAS, TextureAtlas.class);
     }
