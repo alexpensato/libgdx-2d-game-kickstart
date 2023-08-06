@@ -131,6 +131,9 @@ public class GameScreen implements Screen, InputProcessor {
     private void createGameArea() {
         this.backgroundTexture = game.assets().manager().get(Assets.BACKGROUND_TEXTURE);
         this.frontRopesTexture = game.assets().manager().get(Assets.FRONT_ROPES_TEXTURE);
+
+        // change the texture filter to avoid blurry sprites (for background and front ropes only)
+//        backgroundTexture.setFilter(Texture.TextureFilter.Linear, Texture.TextureFilter.Linear);
     }
 
     private void setUpFonts() {
