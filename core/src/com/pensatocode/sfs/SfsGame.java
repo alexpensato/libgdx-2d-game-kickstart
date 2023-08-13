@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.pensatocode.sfs.objects.Fighter;
 import com.pensatocode.sfs.resources.Assets;
+import com.pensatocode.sfs.resources.AudioManager;
 import com.pensatocode.sfs.screens.GameScreen;
 
 public class SfsGame extends Game {
@@ -14,6 +15,7 @@ public class SfsGame extends Game {
     private SpriteBatch batch;
     private ShapeRenderer shapeRenderer;
 	private Assets assets;
+    private AudioManager audioManager;
     private GameScreen gameScreen;
     private Fighter player;
     private Fighter opponent;
@@ -27,6 +29,10 @@ public class SfsGame extends Game {
 		// load all assets
 		assets.load();
 		assets.manager().finishLoading();
+
+        // initialize the audio manager
+        audioManager = new AudioManager(assets.manager());
+        audioManager.playMusic();
 
         // initialize the fighters
         player = new Fighter(this, "Slim Stallone", new Color(1f, 0.2f, 0.2f, 1f));
@@ -60,6 +66,10 @@ public class SfsGame extends Game {
 
     public Assets assets() {
         return assets;
+    }
+
+    public AudioManager audioManager() {
+        return audioManager;
     }
 
     public GameScreen gameScreen() {

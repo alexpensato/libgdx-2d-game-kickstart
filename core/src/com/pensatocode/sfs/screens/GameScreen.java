@@ -109,6 +109,10 @@ public class GameScreen implements Screen, InputProcessor {
     // buttons
     private Sprite playAgainButtonSprite;
     private Sprite mainMenuButtonSprite;
+    private Sprite continueButtonSprite;
+    private Sprite pauseButtonSprite;
+    private static final float PAUSE_BUTTON_MARGIN = 1.5f;
+
 
     public GameScreen(SfsGame newGame) {
         game = newGame;
@@ -180,6 +184,20 @@ public class GameScreen implements Screen, InputProcessor {
                 mainMenuButtonSprite.getWidth() * GlobalVariables.WORLD_SCALE,
                 mainMenuButtonSprite.getHeight() * GlobalVariables.WORLD_SCALE
         );
+
+        // create the continue button sprite
+        continueButtonSprite = new Sprite(buttonTextureAtlas.findRegion("ContinueButton"));
+        continueButtonSprite.setSize(
+                continueButtonSprite.getWidth() * GlobalVariables.WORLD_SCALE,
+                continueButtonSprite.getHeight() * GlobalVariables.WORLD_SCALE
+        );
+
+        // create the pause button sprite
+        pauseButtonSprite = new Sprite(buttonTextureAtlas.findRegion("PauseButton"));
+        pauseButtonSprite.setSize(
+                pauseButtonSprite.getWidth() * GlobalVariables.WORLD_SCALE,
+                pauseButtonSprite.getHeight() * GlobalVariables.WORLD_SCALE
+        );
     }
 
     @Override
@@ -202,6 +220,24 @@ public class GameScreen implements Screen, InputProcessor {
         // start the first round
         currentRound = 1;
         startRound();
+    }
+
+    private void pauseGame() {
+        // set the game state
+        gameState = GameState.PAUSED;
+
+        // pause game sounds and music
+        game.audioManager().pauseAllGameSounds();
+        game.audioManager().pauseMusic();
+    }
+
+    private void resumeGame() {
+        // set the game state
+        gameState = GameState.RUNNING;
+
+        // resume game sounds and music (if it's enabled)
+        game.audioManager().resumeAllGameSounds();
+        game.audioManager().playMusic();
     }
 
     private void startRound() {
@@ -227,6 +263,9 @@ public class GameScreen implements Screen, InputProcessor {
         game.opponent().lose();
         roundsWon++;
 
+        // play cheer sound
+        game.audioManager().playSound(Assets.CHEER_SOUND);
+
         // end the round
         endRound();
     }
@@ -236,6 +275,9 @@ public class GameScreen implements Screen, InputProcessor {
         game.player().lose();
         game.opponent().win();
         roundsLost++;
+
+        // play boo sound
+        game.audioManager().playSound(Assets.BOO_SOUND);
 
         // end the round
         endRound();
@@ -249,7 +291,8 @@ public class GameScreen implements Screen, InputProcessor {
         ScreenUtils.clear(0, 0, 0, 1);
 
         // update the game
-        update(delta);
+        // delta time should be zero when the game is paused
+        update(gameState == GameState.RUNNING ? delta : 0f);
 
         // set the sprite batch amd the shape renderer to use the viewport's camera
         game.batch().setProjectionMatrix(viewport.getCamera().combined);
@@ -284,6 +327,9 @@ public class GameScreen implements Screen, InputProcessor {
         // draw the HUD
         renderHUD();
 
+        // draw the pause button
+        renderPauseButton();
+
         // if the game is over, draw the game over overlay
         if (gameState == GameState.GAME_OVER) {
             // draw the game over overlay
@@ -293,6 +339,12 @@ public class GameScreen implements Screen, InputProcessor {
             if (roundState == RoundState.STARTING) {
                 // draw the start round text
                 renderStartRoundText();
+            }
+
+            // if the game is paused, draw the pause overlay
+            if (gameState == GameState.PAUSED) {
+                // draw the pause overlay
+                renderPauseOverlay();
             }
         }
 
@@ -424,6 +476,13 @@ public class GameScreen implements Screen, InputProcessor {
                 0, Align.center, false);
     }
 
+    private void renderPauseButton() {
+        pauseButtonSprite.setPosition(
+                viewport.getWorldWidth() - PAUSE_BUTTON_MARGIN - pauseButtonSprite.getWidth(),
+                PAUSE_BUTTON_MARGIN);
+        pauseButtonSprite.draw(game.batch());
+    }
+
     private void renderGameOverOverlay() {
         // cover the screen with a black rectangle
         game.batch().end();
@@ -462,6 +521,47 @@ public class GameScreen implements Screen, InputProcessor {
         largeFont.draw(game.batch(), text,
                 viewport.getWorldWidth() / 2f,
                 playAgainButtonSprite.getY() + playAgainButtonSprite.getHeight()
+                        + textMarginBottom + largeFont.getCapHeight(),
+                0, Align.center, false);
+    }
+
+    private void renderPauseOverlay() {
+        // cover the screen with a black rectangle
+        game.batch().end();
+        // enable blending to allow transparency
+        Gdx.gl.glEnable(GL20.GL_BLEND);
+        // set the blending function to blend the alpha channel
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+
+        game.shapeRenderer().begin(ShapeRenderer.ShapeType.Filled);
+        game.shapeRenderer().setColor(0,0,0,0.7f);
+        game.shapeRenderer().rect(0, 0, viewport.getWorldWidth(), viewport.getWorldHeight());
+        game.shapeRenderer().end();
+
+        // disable blending to avoid messing up other stuff
+        Gdx.gl.glDisable(GL20.GL_BLEND);
+
+        game.batch().begin();
+
+        // calculate the layout dimensions
+        float textMarginBottom = 2f;
+        float buttonSpacing = 0.5f;
+        float layoutHeight = largeFont.getCapHeight() + textMarginBottom
+                + continueButtonSprite.getHeight() + buttonSpacing + mainMenuButtonSprite.getHeight();
+        float layoutPositionY = viewport.getWorldHeight() / 2f - layoutHeight / 2f;
+
+        // draw the buttons
+        mainMenuButtonSprite.setPosition(viewport.getWorldWidth() / 2f - mainMenuButtonSprite.getWidth() / 2f,
+                layoutPositionY);
+        mainMenuButtonSprite.draw(game.batch());
+        continueButtonSprite.setPosition(viewport.getWorldWidth() / 2f - continueButtonSprite.getWidth() / 2f,
+                layoutPositionY + mainMenuButtonSprite.getHeight() + buttonSpacing);
+        continueButtonSprite.draw(game.batch());
+
+        // draw the text
+        largeFont.draw(game.batch(), "GAME PAUSED",
+                viewport.getWorldWidth() / 2f,
+                continueButtonSprite.getY() + continueButtonSprite.getHeight()
                         + textMarginBottom + largeFont.getCapHeight(),
                 0, Align.center, false);
     }
@@ -522,6 +622,13 @@ public class GameScreen implements Screen, InputProcessor {
                     // the opponent gets hit
                     game.opponent().getHit(Fighter.HIT_STRENGTH);
                     System.out.println("Opponent hit: " + game.opponent().getLife());
+                    if (game.opponent().isBlocking()) {
+                        // if the opponent is blocking, play block sound
+                        game.audioManager().playSound(Assets.BLOCK_SOUND);
+                    } else {
+                        // otherwise, play hit sound
+                        game.audioManager().playSound(Assets.HIT_SOUND);
+                    }
 
                     // flag that contact has been made to deactivate the player's attack
                     game.player().makeContact();
@@ -563,14 +670,35 @@ public class GameScreen implements Screen, InputProcessor {
         viewport.update(width, height, true);
     }
 
+    /**
+     * Called when the game is paused.
+     * For instance, when the user switches to another app or receives a phone call.
+     * On the desktop, it will be called when the screen is minimized
+     * or immediately before {@link #dispose()} is called.
+     */
     @Override
     public void pause() {
+        // if the game is running, pause it
+        if (gameState == GameState.RUNNING) {
+            pauseGame();
+        }
 
+        // pause the music
+        game.audioManager().pauseMusic();
     }
 
+    /**
+     * Called when the game is resumed from a paused state.
+     * For instance, when the user switches back to the app after a phone call.
+     * On the desktop, it will be called when the window gains focus,
+     * such as after a minimize event, when it is maximized again.
+     * It can also happen when it is moved, such as from one monitor to another.
+     * It can happen before or after {@link #resume()} is called.
+     */
     @Override
     public void resume() {
-
+        // resume the music (if it's enabled)
+        game.audioManager().playMusic();
     }
 
     @Override
@@ -596,7 +724,20 @@ public class GameScreen implements Screen, InputProcessor {
             } else if (gameState == GameState.GAME_OVER) {
                 // if the game is over and the space bar is pressed, restart the game
                 startGame();
+            } else {
+                // if the game is paused and the space bar is pressed, resume the game
+                resumeGame();
             }
+        } else if ((gameState == GameState.RUNNING || gameState == GameState.PAUSED) && keycode == Input.Keys.P) {
+            // if the game is running or paused and the P key is pressed, pause or resume the game
+            if (gameState == GameState.RUNNING) {
+                pauseGame();
+            } else {
+                resumeGame();
+            }
+        } else if (keycode == Input.Keys.M) {
+            // toggle the music on or off
+            game.audioManager().toggleMusic();
         } else {
             if (roundState == RoundState.IN_PROGRESS) {
                 // check if player has pressed a horizontal movement key
@@ -674,7 +815,12 @@ public class GameScreen implements Screen, InputProcessor {
                 viewport.getScreenWidth(), viewport.getScreenHeight());
 
         if (gameState == GameState.RUNNING) {
-            if (roundState == RoundState.STARTING) {
+            if (pauseButtonSprite.getBoundingRectangle().contains(position.x, position.y)) {
+                // if the game is running and the pause button has been pressed, pause the game
+                pauseGame();
+                // play click sound
+                game.audioManager().playSound(Assets.CLICK_SOUND);
+            } else if (roundState == RoundState.STARTING) {
                 // if the round is starting and the screen is touched, skip the start round delay
                 roundStateTime = START_ROUND_DELAY;
             } else if (roundState == RoundState.ENDING) {
@@ -686,6 +832,14 @@ public class GameScreen implements Screen, InputProcessor {
                     && playAgainButtonSprite.getBoundingRectangle().contains(position.x, position.y)) {
                 // if the game is over and the play again button has been pressed, restart the game
                 startGame();
+                // play click sound
+                game.audioManager().playSound(Assets.CLICK_SOUND);
+            } else if (gameState == GameState.PAUSED
+                    && continueButtonSprite.getBoundingRectangle().contains(position.x, position.y)) {
+                // if the game is paused and the continue button has been pressed, continue the game
+                resumeGame();
+                // play click sound
+                game.audioManager().playSound(Assets.CLICK_SOUND);
             }
         }
 

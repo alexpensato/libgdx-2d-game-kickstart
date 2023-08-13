@@ -4,6 +4,8 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.FileHandleResolver;
 import com.badlogic.gdx.assets.loaders.TextureLoader;
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -49,6 +51,16 @@ public class Assets {
     public static final String CHEER_SOUND = "audio/cheer.mp3";
     public static final String CLICK_SOUND = "audio/click.mp3";
     public static final String HIT_SOUND = "audio/hit.mp3";
+
+    /**
+     * For music files, we chose OGG format because it is a free,
+     * open container format maintained by the Xiph.Org Foundation.
+     * It is designed to provide for efficient streaming and manipulation of high quality digital multimedia.
+     * OGG files are smaller than MP3 files and have better sound quality.
+     * OGG files are also free of patents and royalties.
+     * OGG files are supported by all major browsers and devices.
+     * MP3 files have a delay when they start playing, OGG files do not.
+     */
     public static final String MUSIC = "audio/music.ogg";
 
     // menu assets
@@ -60,7 +72,7 @@ public class Assets {
         // load fonts
         loadFonts();
         // load audio assets
-//        loadAudioAssets();
+        loadAudio();
         // load menu assets
 //        loadMenuAssets();
     }
@@ -152,13 +164,13 @@ public class Assets {
         manager.load(LARGE_FONT, BitmapFont.class, largeFont);
     }
 
-    private void loadAudioAssets() {
-        manager.load(BLOCK_SOUND, Texture.class);
-        manager.load(BOO_SOUND, Texture.class);
-        manager.load(CHEER_SOUND, Texture.class);
-        manager.load(CLICK_SOUND, Texture.class);
-        manager.load(HIT_SOUND, Texture.class);
-        manager.load(MUSIC, Texture.class);
+    private void loadAudio() {
+        manager.load(BLOCK_SOUND, Sound.class);
+        manager.load(BOO_SOUND, Sound.class);
+        manager.load(CHEER_SOUND, Sound.class);
+        manager.load(CLICK_SOUND, Sound.class);
+        manager.load(HIT_SOUND, Sound.class);
+        manager.load(MUSIC, Music.class);
     }
 
     private void loadMenuAssets() {
